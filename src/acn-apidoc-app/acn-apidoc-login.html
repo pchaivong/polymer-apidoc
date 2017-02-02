@@ -1,0 +1,54 @@
+
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+
+<dom-module id="acn-apidoc-login">
+    <template>
+        <style>
+
+            paper-input {
+                --paper-input-container-color: #FFCDD2;
+                --paper-input-container-focus-color: #E57373;
+                --paper-input-container-input-color:#FFCDD2;
+                width: 50%;
+            }
+            .center {
+                margin: 0 auto;
+                top: 10%;
+                left: 30%;
+                width: 30%;
+                height: auto;
+                position: relative;
+            }
+        </style>
+        <div class="content center">
+            <paper-input value="{{username}}" label="Username"></paper-input>
+            <paper-input value="{{password}}" type="password" label="Password">Password</paper-input>
+            <paper-button raised on-tap="doLogin">Sign-In</paper-button>
+            <paper-toast id="loginFailed" vertical-align="top", horizontal-align="left">Login Failed, Please try again</paper-toast>
+            <paper-spinner id="logingIn" alt="Loading contacts list"></paper-spinner>
+        </div>
+    </template>
+
+    <script>
+        Polymer({
+            is: 'acn-apidoc-login',
+
+            properties: {
+                username: String,
+                password: String,
+                awsClientId: String,
+                awsPoolId: String,
+            },
+
+            doLogin: function(){
+                this.$.loginFailed.open();
+                this.$.logingIn.active=true;
+            }
+        });
+    </script>
+</dom-module>

@@ -1,0 +1,47 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<link rel="import" href="acn-apidoc-login.html">
+
+<dom-module id="acn-apidoc-app">
+  <template>
+    <style is="custom-style">
+      :host {
+        --app-primary-color:#D32F2F; 
+        display: block;
+        background: #D32F2F;
+        width: 100%;
+        height: 100%;
+      }
+
+      .content {
+        position: fixed;
+        padding: 0;
+        margin: 0;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #D32F2F;
+        color: white;
+      }
+    </style>
+    <div class="content">
+      <acn-apidoc-login></acn-apidoc-login>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'acn-apidoc-app',
+
+      properties: {
+        prop1: {
+          type: String,
+          value: 'acn-apidoc-app',
+        },
+      },
+
+    });
+  </script>
+</dom-module>
