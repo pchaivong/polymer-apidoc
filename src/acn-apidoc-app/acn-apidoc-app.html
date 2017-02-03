@@ -1,6 +1,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <link rel="import" href="acn-apidoc-login.html">
+<link rel="import" href="acn-script.html">
 
 <dom-module id="acn-apidoc-app">
   <template>
@@ -26,8 +27,12 @@
       }
     </style>
     <div class="content">
-      <acn-apidoc-login></acn-apidoc-login>
+      <acn-apidoc-login 
+        aws-client-id="7606ogae47mr47rq79lv4a1lbn" 
+        aws-user-pool-id="ap-northeast-1_z726gzk4m" 
+        aws-identity-pool-id="ap-northeast-1:84e9d5aa-d369-46cf-ba48-c6966dbeea0e"></acn-apidoc-login>
     </div>
+    <acn-script></acn-script>
   </template>
 
   <script>

@@ -42,13 +42,102 @@
                 username: String,
                 password: String,
                 awsClientId: String,
-                awsPoolId: String,
+                awsUserPoolId: String,
+                awsIdentityPoolId: String,
+                awsLambdaRegion: {
+                    type: String,
+                    value: 'ap-southeast-1'
+                },
+                awsCognitoRegion: {
+                    type: String,
+                    value: 'ap-northeast-1'
+                },
+                awsLambdaFunctionName: {
+                    type: String,
+                    value: 'mockGenCookie'
+                },
             },
 
             doLogin: function(){
-                this.$.loginFailed.open();
                 this.$.logingIn.active=true;
-            }
+
+
+                // Cognito Sign-In
+                var authenticationData = {
+                    Username: this.username,
+                    Password: this.password
+                }
+
+                AWSCognito.config.region = this.awsCognitoRegion
+
+                var authenticationDetails = new AWSCognito.CognitoIdentityServiceProvider.AuthenticationDetails(authenticationData);
+                var poolData = { UserPoolId : this.awsUserPoolId,
+                    ClientId : this.awsClientId
+                };
+                var userPool = new AWSCognito.CognitoIdentityServiceProvider.CognitoUserPool(poolData);
+                var userData = {
+                    Username : this.username,
+                    Pool : userPool
+                };
+
+                var cognitoUser = new AWSCognito.CognitoIdentityServiceProvider.CognitoUser(userData);
+
+                cognitoUser.authenticateUser(authenticationDetails, {
+                    onSuccess: function (result) {
+                    // Call lambda                   
+                        AWS.config.region = this.awsCognitoRegion;
+                        AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+                            IdentityPoolId: this.awsIdentityPoolId,
+                            Logins: {
+                                'cognito-idp.ap-northeast-1.amazonaws.com/ap-northeast-1_z726gzk4m': result.getIdToken().getJwtToken()
+                                }
+                            });
+
+                        
+                        var lambda = new AWS.Lambda({region: this.awsLambdaRegion, apiVersion: '2015-03-31'});
+                        var signedParams = {
+                            FunctionName : this.awsLambdaFunctionName,
+                            InvocationType : 'RequestResponse',
+                            LogType : 'None'
+                        };
+
+                        // If login success, continue to invoke lambda function call to get signed cookie
+                        lambda.invoke(signedParams, function(err, data) {
+                            if (err) console.log(err)
+                            else{
+                                // Set-Cookie
+                                var payload = JSON.parse(data['Payload'])
+                                document.cookie = "CloudFront-Policy=" + payload['CloudFront-Policy'];
+                                document.cookie = "CloudFront-Signature=" + payload['CloudFront-Signature'];
+                                document.cookie = "CloudFront-Key-Pair-Id=" + payload['CloudFront-Key-Pair-Id'];
+
+                                //console.log(document.cookie)
+                                // Redirect
+                                window.location.assign('/partner/index.html')
+                            }
+                        });
+
+                    }.bind(this), // On-Success.
+
+                    onFailure: function(err) {
+                        this.$.loginFailed.open();
+                        this.$.logingIn.active=false;
+                    },
+
+                    newPasswordRequired: function(userAttributes, requiredAttributes) {
+                        // User was signed up by an admin and must provide new 
+                        // password and required attributes, if any, to complete 
+                        // authentication.
+
+                        // the api doesn't accept this field back
+                        delete userAttributes.email_verified;
+
+                        // Get these details and call 
+                        cognitoUser.completeNewPasswordChallenge(this.username, userAttributes, this);
+                    }.bind(this)
+
+                });
+            }, // doLogin
         });
     </script>
 </dom-module>
